@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Configuration;
+using PromptApi.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -8,12 +9,14 @@ var configuration = new ConfigurationBuilder()
     .AddEnvironmentVariables() // Optional: Include environment variables in configuration
     .Build();
 
-// Define your configuration settings using a POCO class
-var appSettings = configuration.GetSection("AppSettings").Get<AppSettings>();
+// Get the value of the API key
+string openAiApiKey = builder.Configuration.GetValue<string>("OpenAiApiKey");
 
-builder.Services.AddSingleton(appSettings);
+// Set the value of the environment variable
+Environment.SetEnvironmentVariable("OpenAiApiKey", openAiApiKey);
 
 // Add services to the container.
+builder.Services.AddSingleton<IOpenAiApiService, OpenAiApiService>();
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -36,9 +39,3 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
-
-// Define a POCO class for your configuration settings
-public class AppSettings
-{
-    public string OpenAiApiKey { get; set; }
-}
